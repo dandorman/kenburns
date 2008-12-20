@@ -4,7 +4,7 @@
 <head>
     <title>The Ken Burns Effect</title>
     <style>
-	#dogs { background-image: url(Towel.jpg) }
+	#dogs { background-image: url(Towel.jpg); border-bottom: 1px solid; color: white; font-family: sans-serif; font-size: 1.2em; font-variant: small-caps; text-decoration: none; text-shadow: black 1px 1px 2px }
 	#foo { border: 1px solid black }
     </style>
     <script src="jquery-1.2.6.js"></script>
@@ -30,7 +30,9 @@
 		}).append(img);
 		dogs.css({
 		    backgroundImage: 'none',
+		    left: '5px',
 		    position: 'absolute',
+		    top: '5px',
 		    zIndex: 1
 		});
 
@@ -38,18 +40,22 @@
 		    var time,
 			duration = 1000,
 			completed = true,
-			reversed = false;
+			reversed = false,
+			elapsed = 0;
 
 		    function calculateDuration() {
-			var dur;
+			var dur, trip;
 			if (completed) {
 			    completed = false;
 			    dur = duration;
 			} else {
+			    trip = new Date().getTime() - time;
 			    if (reversed) {
-				dur = duration - (new Date().getTime() - time);
+				elapsed -= trip;
+				dur = duration - elapsed;
 			    } else {
-				dur = duration - (duration - (new Date().getTime() - time));
+				elapsed += trip;
+				dur = elapsed;
 			    }
 			    reversed = !reversed;
 			}
@@ -60,6 +66,7 @@
 		    function reset() {
 			completed = true;
 			reversed = false;
+			elapsed = 0;
 		    }
 
 		    $('#foo').hover(
