@@ -1,0 +1,91 @@
+<!doctype html>
+
+<html>
+<head>
+    <title>The Ken Burns Effect</title>
+    <style>
+	#dogs { background-image: url(Towel.jpg) }
+	#foo { border: 1px solid black }
+    </style>
+    <script src="jquery-1.2.6.js"></script>
+    <script>
+	(function($) {
+	    $(function() {
+		var bg, dogs = $('#dogs'), img;
+		dogs.wrap('<div id="foo"></div>');
+		bg = dogs.css('background-image').match(/url\((.*)\)/)[1];
+		img = document.createElement('img');
+		$(img).attr('src', bg).css({
+		    height: '300px',
+		    left: '-50px',
+		    top: '-40px',
+		    position: 'relative',
+		    zIndex: 0
+		});
+		$('#foo').css({
+		    height: '250px',
+		    width: '250px',
+		    overflow: 'hidden',
+		    position: 'relative'
+		}).append(img);
+		dogs.css({
+		    backgroundImage: 'none',
+		    position: 'absolute',
+		    zIndex: 1
+		});
+
+		(function() {
+		    var time,
+			duration = 1000,
+			completed = true,
+			reversed = false;
+
+		    function calculateDuration() {
+			var dur;
+			if (completed) {
+			    completed = false;
+			    dur = duration;
+			} else {
+			    if (reversed) {
+				dur = duration - (new Date().getTime() - time);
+			    } else {
+				dur = duration - (duration - (new Date().getTime() - time));
+			    }
+			    reversed = !reversed;
+			}
+			time = new Date().getTime();
+			return dur;
+		    }
+
+		    function reset() {
+			completed = true;
+			reversed = false;
+		    }
+
+		    $('#foo').hover(
+			function() {
+			    $(this).find('img').stop().animate({
+				height: '464px',
+				left: '-250px',
+				top: '-100px'
+			    }, calculateDuration(), reset);
+			},
+			function() {
+			    $(this).find('img').stop().animate({
+				height: '300px',
+				left: '-50px',
+				top: '-40px'
+			    }, calculateDuration(), reset);
+			}
+		    );
+		})();
+	    });
+	})(jQuery);
+    </script>
+</head>
+<body>
+    <div id="contents">
+	<a id="dogs" href="#">Dogs</a>
+    </div>
+</body>
+</html>
