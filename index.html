@@ -5,7 +5,7 @@
     <title>The Ken Burns Effect</title>
     <style>
 	#dogs {
-	    background-image: url(Towel.jpg);
+	    background-image: url(towel.jpg);
 	    border: 1px solid silver;
 	    color: white;
 	    display: inline-block;
@@ -19,13 +19,20 @@
     <script src="jquery-1.3b1.js"></script>
     <script>
 	(function($) {
+	    String.prototype.trim = function(chars) {
+		var re;
+		chars = chars || '\\s';
+		re = new RegExp('(^[' + chars + ']+|[' + chars + ']+$)', 'g');
+		return this.replace(re, '');
+	    };
+
 	    $.fn.kenburns = function(options) {
 		this.each(function() {
 		    var obj = $(this),
 			bg = options.src || obj.css('background-image').match(/url\((.*)\)/)[1],
 			img = document.createElement('img');
 
-		    $(img).attr('src', bg).css({
+		    $(img).attr('src', bg.trim('"')).css({
 			left: options.start.left,
 			top: options.start.top,
 			position: 'relative',
