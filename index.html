@@ -4,95 +4,132 @@
 <head>
     <title>The Ken Burns Effect</title>
     <style>
-	#dogs { background-image: url(Towel.jpg); border-bottom: 1px solid; color: white; font-family: sans-serif; font-size: 1.2em; font-variant: small-caps; text-decoration: none; text-shadow: black 1px 1px 2px }
-	#foo { border: 1px solid black }
+	#dogs {
+	    background-image: url(Towel.jpg);
+	    border: 1px solid silver;
+	    color: white;
+	    display: inline-block;
+	    height: 250px;
+	    font-family: sans-serif;
+	    font-size: 1.2em;
+	    text-shadow: black 1px 1px 2px;
+	    width: 250px;
+	}
     </style>
     <script src="jquery-1.3b1.js"></script>
     <script>
 	(function($) {
-	    $(function() {
-		var bg, dogs = $('#dogs'), img;
-		dogs.wrap('<div id="foo"></div>');
-		bg = dogs.css('background-image').match(/url\((.*)\)/)[1];
-		img = document.createElement('img');
-		$(img).attr('src', bg).css({
-		    height: '300px',
-		    left: '-50px',
-		    top: '-40px',
-		    position: 'relative',
-		    zIndex: 0
-		});
-		$('#foo').css({
-		    height: '250px',
-		    width: '250px',
-		    overflow: 'hidden',
-		    position: 'relative'
-		}).append(img);
-		dogs.css({
-		    backgroundImage: 'none',
-		    left: '5px',
-		    position: 'absolute',
-		    top: '5px',
-		    zIndex: 1
-		});
+	    $.fn.kenburns = function(options) {
+		this.each(function() {
+		    var obj = $(this),
+			bg = options.src || obj.css('background-image').match(/url\((.*)\)/)[1],
+			img = document.createElement('img');
 
-		(function() {
-		    var time,
-			duration = 1000,
-			completed = true,
-			reversed = false,
-			elapsed = 0;
+		    $(img).attr('src', bg).css({
+			left: options.start.left,
+			top: options.start.top,
+			position: 'relative',
+			zIndex: 0
+		    })
+		    .attr('height', options.start.height)
+		    .attr('width', options.start.width);
 
-		    function calculateDuration() {
-			var dur, trip;
-			if (completed) {
-			    completed = false;
-			    dur = duration;
-			} else {
-			    trip = new Date().getTime() - time;
-			    if (reversed) {
-				elapsed -= trip;
-				dur = duration - elapsed;
+		    obj.css({
+			backgroundImage: 'none',
+			overflow: 'hidden',
+			position: 'relative'
+		    })
+		    .wrapInner('<span></span>')
+		    .append(img)
+		    .find('span').css({
+			left: 0,
+			position: 'absolute',
+			top: 0,
+			zIndex: 1
+		    });
+
+		    (function() {
+			var time,
+			    duration = options.duration,
+			    completed = true,
+			    reversed = false,
+			    elapsed = 0;
+
+			function calculateDuration() {
+			    var dur, trip;
+			    if (completed) {
+				completed = false;
+				dur = duration;
 			    } else {
-				elapsed += trip;
-				dur = elapsed;
+				trip = new Date().getTime() - time;
+				if (reversed) {
+				    elapsed -= trip;
+				    dur = duration - elapsed;
+				} else {
+				    elapsed += trip;
+				    dur = elapsed;
+				}
+				reversed = !reversed;
 			    }
-			    reversed = !reversed;
+			    time = new Date().getTime();
+			    return dur;
 			}
-			time = new Date().getTime();
-			return dur;
-		    }
 
-		    function reset() {
-			completed = true;
-			reversed = false;
-			elapsed = 0;
-		    }
-
-		    $('#foo').hover(
-			function() {
-			    $(this).find('img').stop().animate({
-				height: '464px',
-				left: '-250px',
-				top: '-100px'
-			    }, calculateDuration(), reset);
-			},
-			function() {
-			    $(this).find('img').stop().animate({
-				height: '300px',
-				left: '-50px',
-				top: '-40px'
-			    }, calculateDuration(), reset);
+			function reset() {
+			    completed = true;
+			    reversed = false;
+			    elapsed = 0;
 			}
-		    );
-		})();
+
+			obj.hover(
+			    function() {
+				$(this).find('img').stop().animate({
+				    height: options.finish.height,
+				    left: options.finish.left,
+				    top: options.finish.top,
+				    width: options.finish.width
+				}, calculateDuration(), reset);
+			    },
+			    function() {
+				$(this).find('img').stop().animate({
+				    height: options.start.height,
+				    left: options.start.left,
+				    top: options.start.top,
+				    width: options.start.width
+				}, calculateDuration(), reset);
+			    }
+			);
+		    })();
+		});
+	    };
+
+	    $(function() {
+		$('#dogs').kenburns({
+		    duration: 1000,
+		    img: {
+			height: 464,
+			width: 600
+		    },
+		    start: {
+			height: 300,
+			left: '-50px',
+			top: '-40px',
+			width: 388
+		    },
+		    finish: {
+			height: 464,
+			left: '-250px',
+			top: '-100px',
+			width: 600
+		    }
+		});
 	    });
 	})(jQuery);
     </script>
 </head>
 <body>
     <div id="contents">
-	<a id="dogs" href="#">Dogs</a>
+	I like <a id="dogs" href="#">dogs</a>.
     </div>
 </body>
 </html>
